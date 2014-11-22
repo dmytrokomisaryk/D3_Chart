@@ -14,8 +14,6 @@ describe ChartsController, type: :controller do
 
         expect(assigns(:statistic)).to include(session_history)
       end
-
-
     end
   end
 end
