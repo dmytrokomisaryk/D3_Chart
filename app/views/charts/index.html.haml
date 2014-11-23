@@ -1,2 +1,12 @@
+.container
+  .header
+    %legend
+      %h1
+        Passed test statistic
+  #statistic-chart
+  .actions
+    = link_to '< previous'
+    |
+    = link_to 'next >'
 :javascript
   StatisticChart.draw(#{@statistic})

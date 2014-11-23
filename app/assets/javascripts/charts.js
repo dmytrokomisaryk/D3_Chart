@@ -1,8 +1,8 @@
 StatisticChart = {
   draw: function (data) {
     var self = this;
-    var margin = {top: 20, right: 100, bottom: 60, left: 40},
-    width = 1366 - margin.left - margin.right,
+    var margin = {top: 20, right: 60, bottom: 60, left: 40},
+    width = 1100 - margin.left - margin.right,
     height = 500 - margin.top - margin.bottom;
 
     var x = d3.scale.ordinal()
@@ -12,7 +12,7 @@ StatisticChart = {
         .rangeRound([height, 0]);
 
     var color = d3.scale.ordinal()
-        .range(['green', '#FF9494', 'red']);
+        .range(['#1FCE6F', '#FF5862', '#E84033']);
 
     var xAxis = d3.svg.axis()
         .scale(x)
@@ -24,7 +24,8 @@ StatisticChart = {
         .orient('left')
         .tickFormat(d3.format('.2s'));
 
-    var svg = d3.select('body').append('svg')
+    var chart = d3.select('#statistic-chart')
+        .append('svg')
         .attr('class', '.tests-chart')
         .attr('width', width + margin.left + margin.right)
         .attr('height', height + margin.top + margin.bottom)
@@ -42,11 +43,10 @@ StatisticChart = {
         d.total = d.columnsNames[d.columnsNames.length - 1].y1;
     });
       
-    data.sort(function(a, b) { return b.total - a.total; });
     x.domain(data.map(function(d) { return self.formatDate(d.created_at); }));
     y.domain([0, d3.max(data, function(d) { return d.total; })]);
-      
-    svg.append('g')
+
+    chart.append('g')
         .attr('class', 'x axis')
         .attr('transform', 'translate(0,' + height + ')')
         .call(xAxis)
@@ -55,17 +55,17 @@ StatisticChart = {
             return 'rotate(-25)'
         });
 
-    svg.append('g')
+    chart.append('g')
         .attr('class', 'y axis')
         .call(yAxis)
         .append('text')
-        .attr('transform', 'rotate(-90)')
-        .attr('y', 6)
+        .attr('y', -9)
+        .attr('x', 23)
         .attr('dy', '.71em')
         .style('text-anchor', 'end')
-        .text('Total tests amount');
+        .text('Tests count');
 
-    var state = svg.selectAll('.state')
+    var state = chart.selectAll('.state')
         .data(data)
         .enter().append('g')
             .attr('class', 'g')
@@ -79,22 +79,23 @@ StatisticChart = {
         .attr('height', function(d) { return y(d.y0) - y(d.y1); })
         .style('fill', function(d) { return color(d.name); });
 
-    var legend = svg.selectAll('.legend')
+    var legend = chart.selectAll('.legend')
         .data(color.domain().slice().reverse())
         .enter().append('g')
         .attr('class', 'legend')
         .attr('transform', function(d, i) { return 'translate(0,' + i * 20 + ')'; });
     legend.append('rect')
-        .attr('x', width + 90)
+        .attr('x', width + 45)
         .attr('width', 18)
         .attr('height', 18)
         .style('fill', color);
     legend.append('text')
-        .attr('x', width + 85)
+        .attr('x', width + 40)
         .attr('y', 9)
         .attr('dy', '.35em')
         .style('text-anchor', 'end')
-        .text(function(d) { return d; });
+        .style('text-transform', 'capitalize')
+        .text(function(d) { return self.lable(d); });
   },
     
   formatDate: function(date) {
@@ -102,5 +103,9 @@ StatisticChart = {
 
       var formatedDate = moment(date).format('MMM, Do, hA');
       return formatedDate;
-  } 
+  },
+
+  lable: function (data) {
+      return data.split("_").shift();
+  }
 };
