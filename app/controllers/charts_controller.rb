@@ -1,12 +1,17 @@
 require 'csv_parser'
+
 class ChartsController < ApplicationController
   def index
-    @statistic = current_csv.quota(35).paginate(1).json
+    @statistic = current_csv.quota(30).paginate(1).json
     respond_to { |format| format.html }
   end
 
   def slide
-    respond_to { |format| format.json { render json: current_csv.quota(35).paginate(params[:index].to_i).json } }
+    render json: { data: current_csv.quota(30).paginate(params[:index].to_i).json }
+  end
+
+  def filter
+    render json: { data: current_csv.by_key(params[:key]).quota(30).paginate(1).json }
   end
 
   private

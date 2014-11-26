@@ -1,12 +1,16 @@
 StatisticChart = {
+  defaultFields: ['passed_tests_count', 'failed_tests_count', 'error_tests_count'],
+  particularField: [],
+  data: null,
   draw: function (data) {
+    this.data = data;
     var self = this;
     var margin = {top: 20, right: 60, bottom: 60, left: 40},
     width = 1100 - margin.left - margin.right,
     height = 500 - margin.top - margin.bottom;
 
     var x = d3.scale.ordinal()
-        .rangeRoundBands([0, width], .1);
+        .rangeRoundBands([0,  data.length * 32], .1);
 
     var y = d3.scale.linear()
         .rangeRound([height, 0]);
@@ -16,8 +20,7 @@ StatisticChart = {
 
     var xAxis = d3.svg.axis()
         .scale(x)
-        .orient('bottom')
-        .ticks(5);
+        .orient('bottom');
 
     var yAxis = d3.svg.axis()
         .scale(y)
@@ -34,7 +37,8 @@ StatisticChart = {
 
 
     color.domain(d3.keys(data[0]).filter(function(key) {
-        return _.contains(['passed_tests_count', 'failed_tests_count', 'error_tests_count'], key);
+        var keys = _.isEmpty(self.particularField) ? self.defaultFields : self.particularField;
+        return _.contains(keys, key);
     }));
       
     data.forEach(function(d) {
@@ -65,12 +69,16 @@ StatisticChart = {
         .style('text-anchor', 'end')
         .text('Tests count');
 
+
     var state = chart.selectAll('.state')
         .data(data)
         .enter().append('g')
             .attr('class', 'g')
             .attr('transform', function(d) { return 'translate(' + x(self.formatDate(d.created_at)) + ',0)'; });
-      
+
+    color.domain(d3.keys(data[0]).filter(function(key) {
+      return _.contains(self.defaultFields, key);
+    }));
     var legend = chart.selectAll('.legend')
         .data(color.domain().slice().reverse())
         .enter().append('g')
@@ -80,18 +88,20 @@ StatisticChart = {
     state.selectAll('rect')
         .data(function(d) { return d.columnsNames; })
         .enter().append('rect')
-        .attr('width', x.rangeBand())
-        .transition()
+        .attr('width', 25)
         .attr('y', function(d) { return y(d.y1); })
-        .duration(1000)
         .attr('height', function(d) { return y(d.y0) - y(d.y1); })
-        .style('fill', function(d) { return color(d.name); });
+        .style('fill', function(d) { return color(d.name); })
+        .attr('transform', function(d, i) { return 'translate(' + 5 + ', 0)'; });
 
     legend.append('rect')
         .attr('x', width + 45)
         .attr('width', 18)
         .attr('height', 18)
-        .style('fill', color);
+        .style('fill', color)
+        .on('click', function (d) {
+            self.filter(d);
+        });
 
     legend.append('text')
         .attr('x', width + 40)
@@ -118,6 +128,7 @@ StatisticChart = {
 
   previous: function () {
       this.slide(this.index += this.dataLimit);
+      $('#next').show();
   },
 
   next: function () {
@@ -133,10 +144,34 @@ StatisticChart = {
           dataType: 'html',
           data: { index: index },
           success: function(response) {
-              d3.select("svg")
-                  .remove();
-              self.draw(JSON.parse(response));
+              self.update(response);
           }
       });
+  },
+
+  cleanChart: function () {
+      d3.select("svg")
+          .remove();
+  },
+
+  filter: function (fieldName) {
+      var self = this;
+      $.ajax({
+          url: 'charts/filter',
+          method: 'POST',
+          async: false,
+          dataType: 'html',
+          data: { key: fieldName },
+          success: function(response) {
+              self.particularField = [fieldName]
+              self.update(response);
+          }
+      });
+  },
+
+  update: function (data) {
+      this.cleanChart();
+      var json = JSON.parse(data);
+      this.draw(JSON.parse(json.data));
   }
 };

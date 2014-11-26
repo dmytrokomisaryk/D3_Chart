@@ -22,6 +22,12 @@ class CsvParser
     @data.to_json
   end
 
+
+  def by_key(key)
+    @data = @data.select{ |item| item[key].to_i > 0 }.sort_by {|item| item[key].to_i}.reverse
+    self
+  end
+
   private
   attr_reader :file_name, :data, :limit
 

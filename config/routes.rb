@@ -4,6 +4,7 @@ Rails.application.routes.draw do
   resources :charts do
     collection do
       post :slide
+      post :filter
     end
   end
 end
