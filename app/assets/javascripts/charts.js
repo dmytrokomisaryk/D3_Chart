@@ -31,10 +31,10 @@ StatisticChart = {
         .attr('height', height + margin.top + margin.bottom)
         .append('g')
         .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
-      
+
 
     color.domain(d3.keys(data[0]).filter(function(key) {
-    return _.contains(['passed_tests_count', 'failed_tests_count', 'error_tests_count'], key);
+        return _.contains(['passed_tests_count', 'failed_tests_count', 'error_tests_count'], key);
     }));
       
     data.forEach(function(d) {
@@ -71,24 +71,28 @@ StatisticChart = {
             .attr('class', 'g')
             .attr('transform', function(d) { return 'translate(' + x(self.formatDate(d.created_at)) + ',0)'; });
       
-    state.selectAll('rect')
-    .data(function(d) { return d.columnsNames; })
-    .enter().append('rect')
-        .attr('width', x.rangeBand())
-        .attr('y', function(d) { return y(d.y1); })
-        .attr('height', function(d) { return y(d.y0) - y(d.y1); })
-        .style('fill', function(d) { return color(d.name); });
-
     var legend = chart.selectAll('.legend')
         .data(color.domain().slice().reverse())
         .enter().append('g')
         .attr('class', 'legend')
         .attr('transform', function(d, i) { return 'translate(0,' + i * 20 + ')'; });
+
+    state.selectAll('rect')
+        .data(function(d) { return d.columnsNames; })
+        .enter().append('rect')
+        .attr('width', x.rangeBand())
+        .transition()
+        .attr('y', function(d) { return y(d.y1); })
+        .duration(1000)
+        .attr('height', function(d) { return y(d.y0) - y(d.y1); })
+        .style('fill', function(d) { return color(d.name); });
+
     legend.append('rect')
         .attr('x', width + 45)
         .attr('width', 18)
         .attr('height', 18)
         .style('fill', color);
+
     legend.append('text')
         .attr('x', width + 40)
         .attr('y', 9)
@@ -107,5 +111,32 @@ StatisticChart = {
 
   lable: function (data) {
       return data.split("_").shift();
+  },
+
+  index: 1,
+  dataLimit: 35,
+
+  previous: function () {
+      this.slide(this.index += this.dataLimit);
+  },
+
+  next: function () {
+      this.slide(this.index -= this.dataLimit);
+  },
+
+  slide: function (index) {
+      var self = this;
+      $.ajax({
+          url: 'charts/slide',
+          method: 'POST',
+          async: false,
+          dataType: 'html',
+          data: { index: index },
+          success: function(response) {
+              d3.select("svg")
+                  .remove();
+              self.draw(JSON.parse(response));
+          }
+      });
   }
 };
