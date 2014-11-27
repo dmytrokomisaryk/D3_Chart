@@ -1,11 +1,12 @@
 .container
-  .header
-    %legend
-      %h1
-        Passed test statistic
+  .page-header
+    %h1
+      Passed test statistic
   #statistic-chart
   .actions
-    = link_to '< previous', 'javascript:void(0)', id: :previous, onclick: 'StatisticChart.previous();'
-    = link_to 'next >', 'javascript:void(0)', id: :next, onclick: 'StatisticChart.next();'
+    %button{type: 'button', class: 'btn btn-info', id: :previous, onclick: 'StatisticChart.previous();' }
+      < Previous
+    %button{type: 'button', class: 'btn btn-info', id: :next, onclick: 'StatisticChart.next();' }
+      Next >
 :javascript
   StatisticChart.draw(#{@statistic})

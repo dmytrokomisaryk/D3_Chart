@@ -123,8 +123,8 @@ StatisticChart = {
       return data.split("_").shift();
   },
 
-  index: 1,
-  dataLimit: 35,
+  index: 0,
+  dataLimit: 30,
 
   previous: function () {
       this.slide(this.index += this.dataLimit);
@@ -140,9 +140,10 @@ StatisticChart = {
       $.ajax({
           url: 'charts/slide',
           method: 'POST',
-          async: false,
-          dataType: 'html',
-          data: { index: index },
+          data: {
+              index: index,
+              key: self.particularField[0] },
+          cache: false,
           success: function(response) {
               self.update(response);
           }
@@ -159,9 +160,8 @@ StatisticChart = {
       $.ajax({
           url: 'charts/filter',
           method: 'POST',
-          async: false,
-          dataType: 'html',
           data: { key: fieldName },
+          cache: false,
           success: function(response) {
               self.particularField = [fieldName]
               self.update(response);
@@ -169,9 +169,21 @@ StatisticChart = {
       });
   },
 
-  update: function (data) {
+  update: function (response) {
       this.cleanChart();
-      var json = JSON.parse(data);
-      this.draw(JSON.parse(json.data));
+      this.draw(JSON.parse(response.data));
+      this.toggleLink(response.info);
+
+  },
+
+  toggleLink: function (response) {
+      _.each(response, function(bool, key) {
+          var $link = $('#' + key);
+          if (bool) {
+              $link.show();
+          } else {
+              $link.hide();
+          }
+      });
   }
 };
