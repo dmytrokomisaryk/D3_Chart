@@ -98,18 +98,18 @@ StatisticChart = {
         .attr('x', width + 45)
         .attr('width', 18)
         .attr('height', 18)
+        .attr('id', function (d) { return d; })
         .style('fill', color)
         .style('cursor', 'pointer')
         .on('click', function (d) {
             self.filter(d);
         })
         .on('mouseover', function () {
-            d3.select(this)
-                .style({ opacity:'0.5' });
+            self.blackOut(d3.select(this));
         })
         .on('mouseout', function () {
-            d3.select(this)
-                .style({ opacity:'1' });
+            if (this.classList.contains('active')) { return; }
+            self.brighten(d3.select(this));
         });
 
     legend.append('text')
@@ -119,6 +119,35 @@ StatisticChart = {
         .style('text-anchor', 'end')
         .style('text-transform', 'capitalize')
         .text(function(d) { return self.lable(d); });
+
+    chart.append('rect')
+        .attr('x', width + 45)
+        .attr('y', 70)
+        .attr('class', 'reset')
+        .attr('height', 18)
+        .attr('width', 18)
+        .style('fill', 'grey')
+        .style('visibility',  'hidden')
+        .on('click', function () {
+            self.filter(null);
+        })
+        .on('mouseover', function () {
+            self.blackOut(d3.select(this));
+        })
+        .on('mouseout', function () {
+            self.brighten(d3.select(this));
+        });
+
+    chart.append("text")
+        .attr('x', width + 25)
+        .attr('y', 79)
+        .attr('class', 'reset')
+        .style('fill', 'black')
+        .attr('dy', '.35em')
+        .attr('text-anchor', 'middle')
+        .style('pointer-events', 'none')
+        .style('visibility',  'hidden')
+        .text('Reset');
   },
     
   formatDate: function(date) {
@@ -160,7 +189,7 @@ StatisticChart = {
   },
 
   cleanChart: function () {
-      d3.select("svg")
+      d3.select('svg')
           .remove();
   },
 
@@ -172,8 +201,10 @@ StatisticChart = {
           data: { key: fieldName },
           cache: false,
           success: function(response) {
-              self.particularField = [fieldName]
+              self.particularField = fieldName ? [fieldName] : [];
               self.update(response);
+              self.toggleResetAction(fieldName == null);
+              self.setActiveAction(fieldName);
           }
       });
   },
@@ -194,5 +225,25 @@ StatisticChart = {
               $link.hide();
           }
       });
+  },
+
+  toggleResetAction: function (condition) {
+      var state = condition ? 'hidden' : 'visible';
+
+      d3.selectAll('.reset')
+          .style('visibility',  state);
+  },
+
+  setActiveAction: function (id){
+      if (!id) { return; }
+      d3.select('#' + id).attr('class', 'active');
+  },
+
+  blackOut: function (element) {
+      element.style({ opacity: '0.5' });
+  },
+
+  brighten: function (element) {
+      element.style({ opacity: '1' });
   }
 };
