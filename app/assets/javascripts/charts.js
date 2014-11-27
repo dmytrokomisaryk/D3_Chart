@@ -99,8 +99,17 @@ StatisticChart = {
         .attr('width', 18)
         .attr('height', 18)
         .style('fill', color)
+        .style('cursor', 'pointer')
         .on('click', function (d) {
             self.filter(d);
+        })
+        .on('mouseover', function () {
+            d3.select(this)
+                .style({ opacity:'0.5' });
+        })
+        .on('mouseout', function () {
+            d3.select(this)
+                .style({ opacity:'1' });
         });
 
     legend.append('text')
