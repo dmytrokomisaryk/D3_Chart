@@ -49,7 +49,7 @@ class CsvParser
     File.join(Rails.root, 'statistic_data', "#{file_name}.csv")
   end
 
-  def check_previous_and_previous_data(index)
+  def check_previous_and_next_data(index)
     next_index = index - 1
     previous_index = index + limit + 1
 
