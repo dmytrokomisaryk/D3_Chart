@@ -14,7 +14,7 @@ class CsvParser
   end
 
   def paginate(from_index)
-    check_previous_and_previous_data(from_index)
+    check_previous_and_next_data(from_index)
     @data = @data[from_index..(from_index + limit - 1)].reverse
     self
   end
