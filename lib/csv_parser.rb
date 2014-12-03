@@ -42,7 +42,7 @@ class CsvParser
 
   def parse
     csv = CSV.open(file_path, headers: true)
-    @data = csv.map { |row| row.to_h }
+    @data = csv.map { |row| row.to_hash }
   end
 
   def file_path
