@@ -1,12 +1,5 @@
-.container
-  .page-header
-    %h1
-      Passed test statistic
-  #statistic-chart
-  .actions
-    %button{type: 'button', class: 'btn btn-info', id: :previous, onclick: 'StatisticChart.previous();' }
-      < Previous
-    %button{type: 'button', class: 'btn btn-info', id: :next, onclick: 'StatisticChart.next();' }
-      Next >
+%din
+  %svg#statistic-chart
+
 :javascript
-  StatisticChart.draw(#{@statistic})
+  StatisticChart.draw(#{@statistic.to_json});
